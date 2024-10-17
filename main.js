@@ -87,7 +87,7 @@ let enemy = {
     },
 
     attack(target) {
-        const { attackPower, name: enemyName } = this.current; // Деструктуризація
+        const { attackPower, name: enemyName } = this.current;
         const damage = Math.floor(Math.random() * attackPower) + 1;
         target.health -= damage;
         if (target.health < 0) target.health = 0;
@@ -109,7 +109,7 @@ function updateEnemyDisplay() {
     const enemySprite = document.querySelector('.enemy .sprite');
     const enemyName = document.getElementById("name-enemy");
 
-    const { sprite, name, maxHealth } = enemy.current; // Деструктуризація
+    const { sprite, name, maxHealth } = enemy.current;
     enemySprite.src = sprite;
     enemyName.textContent = name;
 
