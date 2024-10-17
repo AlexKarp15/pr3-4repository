@@ -26,7 +26,7 @@ function addLog(message) {
     const logContainer = document.getElementById('logs');
     const newLog = document.createElement('div');
     newLog.textContent = message;
-    logContainer.prepend(newLog);
+    logContainer.prepend(newLog); // Додаємо новий лог зверху
 }
 
 // Об'єкт персонажа
@@ -50,6 +50,7 @@ let character = {
         if (target.health < 0) target.health = 0;
         target.updateHealth();
 
+        // Генеруємо лог бою
         const logMessage = generateLog(this.name, target.current.name, damage, target.health);
         addLog(logMessage);
 
@@ -57,7 +58,7 @@ let character = {
             alert(`Ви перемогли ${target.current.name}!`);
             loadNextEnemy();
         } else {
-            target.attack(this);
+            target.attack(this); // Ворога атакує персонаж
         }
     }
 };
@@ -80,18 +81,19 @@ let enemy = {
     updateHealth() {
         const healthDisplay = document.getElementById(`health-enemy`);
         const progressBar = document.getElementById(`progressbar-enemy`);
-        const { maxHealth } = this.current;
+        const { maxHealth } = this.current; // Деструктуризація
         healthDisplay.textContent = `${this.health} / ${maxHealth}`;
         progressBar.style.width = `${(this.health / maxHealth) * 100}%`;
     },
 
     attack(target) {
-        const { attackPower, name: enemyName } = this.current; 
+        const { attackPower, name: enemyName } = this.current; // Деструктуризація
         const damage = Math.floor(Math.random() * attackPower) + 1;
         target.health -= damage;
         if (target.health < 0) target.health = 0;
         target.updateHealth();
 
+        // Генеруємо лог бою
         const logMessage = generateLog(enemyName, target.name, damage, target.health);
         addLog(logMessage);
 
@@ -107,7 +109,7 @@ function updateEnemyDisplay() {
     const enemySprite = document.querySelector('.enemy .sprite');
     const enemyName = document.getElementById("name-enemy");
 
-    const { sprite, name, maxHealth } = enemy.current;
+    const { sprite, name, maxHealth } = enemy.current; // Деструктуризація
     enemySprite.src = sprite;
     enemyName.textContent = name;
 
@@ -129,35 +131,33 @@ function loadNextEnemy() {
 }
 
 // Функція для підрахунку кліків з обмеженням кількості
-function createClickCounter(buttonName, maxClicks) {
-    let clicks = 0;
-
+function createClickCounter(buttonName, maxClicks, clickCounter) {
     return function() {
-        if (clicks < maxClicks) {
-            clicks++;
-            console.log(`Button ${buttonName} clicked ${clicks} times. Remaining: ${maxClicks - clicks}`);
-            addLog(`Атака "${buttonName}" була виконана ${clicks} раз(и). Залишилося ${maxClicks - clicks}.`);
-            if (clicks <= maxClicks) {
-                character.attack(enemy);
-            }
+        if (clickCounter.count < maxClicks) {
+            clickCounter.count++;
+            console.log(`Button ${buttonName} clicked ${clickCounter.count} times. Remaining: ${maxClicks - clickCounter.count}`);
+            addLog(`Атака "${buttonName}" була виконана ${clickCounter.count} раз(и). Залишилося ${maxClicks - clickCounter.count}.`);
+            
+            // Виконуємо атаку, якщо ліміт не досягнутий
+            character.attack(enemy); // Персонаж атакує ворога
         } else {
             console.log(`Button ${buttonName} has reached the maximum limit of ${maxClicks} clicks.`);
-            addLog(`Атака "${buttonName}" досягла максимального ліміту ${maxClicks} натискань.`); 
+            addLog(`Атака "${buttonName}" досягла максимального ліміту ${maxClicks} натискань.`);
         }
     };
 }
 
 // Функція для додавання лічильника кліків до кнопки
-function setupButtonClickHandlers(buttonId, buttonName, maxClicks) {
+function setupButtonClickHandlers(buttonId, buttonName, maxClicks, clickCounter) {
     const button = document.getElementById(buttonId);
-    const clickHandler = createClickCounter(buttonName, maxClicks);
+    const clickHandler = createClickCounter(buttonName, maxClicks, clickCounter); // Створюємо замикання для підрахунку кліків
 
     button.addEventListener('click', clickHandler);
 }
 
-// Ініціалізація кнопок з лічильниками кліків
-setupButtonClickHandlers('btn-kick', 'Thunder Jolt', 12);  
-setupButtonClickHandlers('btn-attack-2', 'Quick Attack', 7); 
+// Ініціалізація кнопок з лічильниками кліків (вказуємо, скільки кліків дозволено для кожної кнопки)
+setupButtonClickHandlers('btn-kick', 'Thunder Jolt', 12, { count: 0 });  // Ліміт для "Thunder Jolt"
+setupButtonClickHandlers('btn-attack-2', 'Quick Attack', 7, { count: 0 });  // Ліміт для "Quick Attack"
 
 // Очищаємо всі логи
 function clearLogs() {
@@ -170,8 +170,16 @@ function resetGame() {
     enemy.currentEnemyIndex = 0;
     character.health = character.maxHealth;
     enemy.health = enemy.current.maxHealth;
+
+    // Скидаємо лічильники кліків для обох атак
+    setupButtonClickHandlers('btn-kick', 'Thunder Jolt', 6, { count: 0 });
+    setupButtonClickHandlers('btn-attack-2', 'Quick Attack', 6, { count: 0 });
+
+    // Оновлюємо здоров'я персонажів і ворогів
     character.updateHealth();
     updateEnemyDisplay();
+
+    // Очищуємо логи
     clearLogs();
 }
 
