@@ -130,6 +130,10 @@ function loadNextEnemy() {
     updateEnemyDisplay();
 }
 
+// Змінні для зберігання обробників подій
+let thunderJoltHandler = null;
+let quickAttackHandler = null;
+
 // Функція для підрахунку кліків з обмеженням кількості
 function createClickCounter(buttonName, maxClicks, clickCounter) {
     return function() {
@@ -153,11 +157,36 @@ function setupButtonClickHandlers(buttonId, buttonName, maxClicks, clickCounter)
     const clickHandler = createClickCounter(buttonName, maxClicks, clickCounter); // Створюємо замикання для підрахунку кліків
 
     button.addEventListener('click', clickHandler);
+
+    // Зберігаємо обробник, щоб потім можна було його очистити
+    if (buttonId === 'btn-kick') {
+        thunderJoltHandler = clickHandler;
+    } else if (buttonId === 'btn-attack-2') {
+        quickAttackHandler = clickHandler;
+    }
+}
+
+// Функція для очищення обробників подій
+function clearButtonClickHandlers() {
+    const btnKick = document.getElementById('btn-kick');
+    const btnAttack2 = document.getElementById('btn-attack-2');
+
+    if (thunderJoltHandler) {
+        btnKick.removeEventListener('click', thunderJoltHandler);
+    }
+
+    if (quickAttackHandler) {
+        btnAttack2.removeEventListener('click', quickAttackHandler);
+    }
+
+    // Скидаємо змінні обробників
+    thunderJoltHandler = null;
+    quickAttackHandler = null;
 }
 
 // Ініціалізація кнопок з лічильниками кліків (вказуємо, скільки кліків дозволено для кожної кнопки)
-setupButtonClickHandlers('btn-kick', 'Thunder Jolt', 12, { count: 0 });  // Ліміт для "Thunder Jolt"
-setupButtonClickHandlers('btn-attack-2', 'Quick Attack', 7, { count: 0 });  // Ліміт для "Quick Attack"
+setupButtonClickHandlers('btn-kick', 'Thunder Jolt', 12, { count: 0 });
+setupButtonClickHandlers('btn-attack-2', 'Quick Attack', 7, { count: 0 });
 
 // Очищаємо всі логи
 function clearLogs() {
@@ -171,9 +200,12 @@ function resetGame() {
     character.health = character.maxHealth;
     enemy.health = enemy.current.maxHealth;
 
-    // Скидаємо лічильники кліків для обох атак
-    setupButtonClickHandlers('btn-kick', 'Thunder Jolt', 6, { count: 0 });
-    setupButtonClickHandlers('btn-attack-2', 'Quick Attack', 6, { count: 0 });
+    // Очищаємо попередні обробники подій
+    clearButtonClickHandlers();
+
+    // Оновлюємо лічильники кліків для обох атак
+    setupButtonClickHandlers('btn-kick', 'Thunder Jolt', 12, { count: 0 });
+    setupButtonClickHandlers('btn-attack-2', 'Quick Attack', 7, { count: 0 });
 
     // Оновлюємо здоров'я персонажів і ворогів
     character.updateHealth();
