@@ -184,7 +184,7 @@ function clearButtonClickHandlers() {
     quickAttackHandler = null;
 }
 
-// Ініціалізація кнопок з лічильниками кліків (вказуємо, скільки кліків дозволено для кожної кнопки)
+// Ініціалізація кнопок з лічильниками кліків
 setupButtonClickHandlers('btn-kick', 'Thunder Jolt', 12, { count: 0 });
 setupButtonClickHandlers('btn-attack-2', 'Quick Attack', 7, { count: 0 });
 
